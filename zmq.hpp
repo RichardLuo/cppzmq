@@ -100,6 +100,13 @@ typedef struct {
 #   define ZMQ_ASSERT(expression) (void)(expression)
 #endif
 
+#include <utils/Log.h>
+#define MY_THROW(x)                                             \
+    do {                                                        \
+        LOG_IF_EXIT(true, "cppzmq c++ exceptions occured!!!");  \
+    } while (0)
+
+
 namespace zmq
 {
 
@@ -131,7 +138,7 @@ namespace zmq
     {
         int rc = zmq_poll (const_cast<zmq_pollitem_t*>(items_), static_cast<int>(nitems_), timeout_);
         if (rc < 0)
-            throw error_t ();
+            MY_THROW();
         return rc;
     }
 
@@ -163,7 +170,7 @@ namespace zmq
     {
         int rc = zmq_proxy (frontend, backend, capture);
         if (rc != 0)
-            throw error_t ();
+            MY_THROW();
     }
     
 #ifdef ZMQ_HAS_PROXY_STEERABLE
@@ -171,7 +178,7 @@ namespace zmq
     {
         int rc = zmq_proxy_steerable (frontend, backend, capture, control);
         if (rc != 0)
-            throw error_t ();
+            MY_THROW();
     }
 #endif
     
@@ -199,14 +206,14 @@ namespace zmq
         {
             int rc = zmq_msg_init (&msg);
             if (rc != 0)
-                throw error_t ();
+                MY_THROW();
         }
 
         inline explicit message_t (size_t size_)
         {
             int rc = zmq_msg_init_size (&msg, size_);
             if (rc != 0)
-                throw error_t ();
+                MY_THROW();
         }
 
         template<typename I> message_t(I first, I last):
@@ -218,7 +225,7 @@ namespace zmq
             size_type const size_ = std::distance(first, last)*sizeof(value_t);
             int const rc = zmq_msg_init_size (&msg, size_);
             if (rc != 0)
-                throw error_t ();
+                MY_THROW();
             value_t* dest = data<value_t>();
             while (first != last)
             {
@@ -231,7 +238,7 @@ namespace zmq
         {
             int rc = zmq_msg_init_size (&msg, size_);
             if (rc != 0)
-                throw error_t ();
+                MY_THROW();
             memcpy(data(), data_, size_);
         }
 
@@ -240,7 +247,7 @@ namespace zmq
         {
             int rc = zmq_msg_init_data (&msg, data_, size_, ffn_, hint_);
             if (rc != 0)
-                throw error_t ();
+                MY_THROW();
         }
 
 #ifdef ZMQ_HAS_RVALUE_REFS
@@ -248,7 +255,7 @@ namespace zmq
         {
             int rc = zmq_msg_init (&rhs.msg);
             if (rc != 0)
-                throw error_t ();
+                MY_THROW();
         }
 
         inline message_t &operator = (message_t &&rhs) ZMQ_NOTHROW
@@ -268,30 +275,30 @@ namespace zmq
         {
             int rc = zmq_msg_close (&msg);
             if (rc != 0)
-                throw error_t ();
+                MY_THROW();
             rc = zmq_msg_init (&msg);
             if (rc != 0)
-                throw error_t ();
+                MY_THROW();
         }
 
         inline void rebuild (size_t size_)
         {
             int rc = zmq_msg_close (&msg);
             if (rc != 0)
-                throw error_t ();
+                MY_THROW();
             rc = zmq_msg_init_size (&msg, size_);
             if (rc != 0)
-                throw error_t ();
+                MY_THROW();
         }
 
         inline void rebuild (const void *data_, size_t size_)
         {
             int rc = zmq_msg_close (&msg);
             if (rc != 0)
-                throw error_t ();
+                MY_THROW();
             rc = zmq_msg_init_size (&msg, size_);
             if (rc != 0)
-                throw error_t ();
+                MY_THROW();
             memcpy(data(), data_, size_);
         }
 
@@ -300,24 +307,24 @@ namespace zmq
         {
             int rc = zmq_msg_close (&msg);
             if (rc != 0)
-                throw error_t ();
+                MY_THROW();
             rc = zmq_msg_init_data (&msg, data_, size_, ffn_, hint_);
             if (rc != 0)
-                throw error_t ();
+                MY_THROW();
         }
 
         inline void move (message_t const *msg_)
         {
             int rc = zmq_msg_move (&msg, const_cast<zmq_msg_t*>(&(msg_->msg)));
             if (rc != 0)
-                throw error_t ();
+                MY_THROW();
         }
 
         inline void copy (message_t const *msg_)
         {
             int rc = zmq_msg_copy (&msg, const_cast<zmq_msg_t*>(&(msg_->msg)));
             if (rc != 0)
-                throw error_t ();
+                MY_THROW();
         }
 
         inline bool more () const ZMQ_NOTHROW
@@ -379,7 +386,7 @@ namespace zmq
         {
             ptr = zmq_ctx_new ();
             if (ptr == NULL)
-                throw error_t ();
+                MY_THROW();
         }
 
 
@@ -387,7 +394,7 @@ namespace zmq
         {
             ptr = zmq_ctx_new ();
             if (ptr == NULL)
-                throw error_t ();
+                MY_THROW();
 
             int rc = zmq_ctx_set (ptr, ZMQ_IO_THREADS, io_threads_);
             ZMQ_ASSERT (rc == 0);
@@ -525,7 +532,7 @@ namespace zmq
         {
             int rc = zmq_setsockopt (ptr, option_, optval_, optvallen_);
             if (rc != 0)
-                throw error_t ();
+                MY_THROW();
         }
 
         inline void getsockopt (int option_, void *optval_,
@@ -533,7 +540,7 @@ namespace zmq
         {
             int rc = zmq_getsockopt (ptr, option_, optval_, optvallen_);
             if (rc != 0)
-                throw error_t ();
+                MY_THROW();
         }
 
         template<typename T> T getsockopt(int option_) const
@@ -553,7 +560,7 @@ namespace zmq
         {
             int rc = zmq_bind (ptr, addr_);
             if (rc != 0)
-                throw error_t ();
+                MY_THROW();
         }
 
         inline void unbind(std::string const& addr)
@@ -565,7 +572,7 @@ namespace zmq
         {
             int rc = zmq_unbind (ptr, addr_);
             if (rc != 0)
-                throw error_t ();
+                MY_THROW();
         }
 
         inline void connect(std::string const& addr)
@@ -577,7 +584,7 @@ namespace zmq
         {
             int rc = zmq_connect (ptr, addr_);
             if (rc != 0)
-                throw error_t ();
+                MY_THROW();
         }
 
         inline void disconnect(std::string const& addr)
@@ -589,7 +596,7 @@ namespace zmq
         {
             int rc = zmq_disconnect (ptr, addr_);
             if (rc != 0)
-                throw error_t ();
+                MY_THROW();
         }
 
         inline bool connected() const ZMQ_NOTHROW
@@ -604,7 +611,7 @@ namespace zmq
                 return (size_t) nbytes;
             if (zmq_errno () == EAGAIN)
                 return 0;
-            throw error_t ();
+            MY_THROW();
         }
 
         inline bool send (message_t &msg_, int flags_ = 0)
@@ -614,7 +621,7 @@ namespace zmq
                 return true;
             if (zmq_errno () == EAGAIN)
                 return false;
-            throw error_t ();
+            MY_THROW();
         }
 
         template<typename I> bool send(I first, I last, int flags_=0)
@@ -637,7 +644,7 @@ namespace zmq
                 return (size_t) nbytes;
             if (zmq_errno () == EAGAIN)
                 return 0;
-            throw error_t ();
+            MY_THROW();
         }
 
         inline bool recv (message_t *msg_, int flags_ = 0)
@@ -647,7 +654,7 @@ namespace zmq
                 return true;
             if (zmq_errno () == EAGAIN)
                 return false;
-            throw error_t ();
+            MY_THROW();
         }
         
     private:
@@ -656,7 +663,7 @@ namespace zmq
             ctxptr = context_.ptr;
             ptr = zmq_socket (context_.ptr, type_ );
             if (ptr == NULL)
-                throw error_t ();
+                MY_THROW();
         }
 
         void *ptr;
@@ -681,7 +688,7 @@ namespace zmq
         {
             int rc = zmq_socket_monitor(socket.ptr, addr_, events);
             if (rc != 0)
-                throw error_t ();
+                MY_THROW();
 
             socketPtr = socket.ptr;
             void *s = zmq_socket (socket.ctxptr, ZMQ_PAIR);
