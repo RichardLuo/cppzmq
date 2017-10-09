@@ -25,7 +25,8 @@
 #ifndef __ZMQ_HPP_INCLUDED__
 #define __ZMQ_HPP_INCLUDED__
 
-#if __cplusplus >= 201103L
+// #if __cplusplus >= 201103L
+#if 0
 #define ZMQ_CPP11
 #define ZMQ_NOTHROW noexcept
 #define ZMQ_EXPLICIT explicit
